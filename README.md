@@ -4,13 +4,13 @@ Agent Skills that extend Claude's capabilities when connected to [Multiplist](ht
 
 ## Skills
 
-### [Seed Doc Renderer](./seed-doc-renderer/SKILL.md)
+### Seed Doc Renderer
 Renders extracted meaning from your vault as a beautiful, structured artifact. When you say "show me my Seed Doc," Claude presents your decisions, frameworks, golden passages, and more as a polished visual document with provenance indicators and category navigation.
 
-### [Archivist Research](./archivist-research/SKILL.md)
+### Archivist Research
 Guides Claude through deep research synthesis across your entire vault. Ask "how has my thinking about pricing evolved?" and the Archivist synthesizes across all your saved conversations, producing a citable research brief with full provenance.
 
-### [Custom Extraction Skills](./custom-extraction-skills/SKILL.md)
+### Custom Extraction Skills
 Teaches Claude how to help you create custom extraction categories beyond the default nine. A coach creates "Client Breakthroughs." A product manager creates "Sprint Decisions." Claude guides you through defining what matters in your domain, then builds the skill.
 
 ## What is Multiplist?
