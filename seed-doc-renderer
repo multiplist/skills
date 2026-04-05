@@ -1,0 +1,132 @@
+---
+name: Multiplist Seed Doc Renderer
+description: Render extracted meaning from Multiplist as a beautiful, structured artifact with category navigation, provenance indicators, and progressive disclosure.
+---
+
+# Multiplist Seed Doc Renderer
+
+When a user asks to see their Seed Doc, extraction results, or saved meaning from Multiplist, render the results as a polished, structured artifact — not raw text.
+
+## Prerequisites
+
+This skill requires the Multiplist MCP connector to be connected. The user's vault must contain at least one extracted source.
+
+## When to Activate
+
+- User says "show me my Seed Doc"
+- User says "render my extraction"
+- User says "show me what Multiplist found"
+- User asks to see results from a specific source after saving
+- After a `get_source` call returns extraction data
+
+## The Flow
+
+1. Call `get_source` with `format: "document"` to retrieve the structured extraction
+2. Parse the returned markdown into sections: abstract, and each extraction category
+3. Render as an HTML or React artifact using the design patterns below
+4. Present with progressive disclosure — summary first, categories on demand
+
+## Rendering the Artifact
+
+Create an HTML artifact with the following structure and design:
+
+### Layout
+
+```
+┌─────────────────────────────────────────────┐
+│  SOURCE TITLE                               │
+│  Type · Character count · Seed count · Date │
+├─────────────────────────────────────────────┤
+│  ABSTRACT                                   │
+│  The synthesis paragraph — what this        │
+│  conversation was really about.             │
+├─────────────────────────────────────────────┤
+│  CATEGORY NAVIGATION                        │
+│  [Decisions (5)] [Frameworks (3)]           │
+│  [Golden Passages (7)] [Actions (4)]        │
+│  Only show categories that have seeds.      │
+├─────────────────────────────────────────────┤
+│  ACTIVE CATEGORY CONTENT                    │
+│                                             │
+│  Each seed as a card:                       │
+│  ┌─────────────────────────────────────┐    │
+│  │ Title                    confidence │    │
+│  │ Content excerpt...                  │    │
+│  │ ↳ Lines 47-52 · Source: [name]      │    │
+│  └─────────────────────────────────────┘    │
+│                                             │
+├─────────────────────────────────────────────┤
+│  Created with Multiplist · multiplist.ai    │
+└─────────────────────────────────────────────┘
+```
+
+### Design Principles
+
+- **Dark theme** matching Multiplist's brand (dark background, light text)
+- **Category pills** as navigation — colored by category type, showing count
+- **Seed cards** with title, content preview, confidence badge, and provenance line
+- **Provenance always visible** — every seed shows its line numbers and source
+- **Progressive disclosure** — abstract visible by default, click a category to explore
+- **Golden Passages** rendered as blockquotes with quotation styling
+- **Decisions** rendered with a lock icon and confidence indicator
+- **Frameworks** rendered with structured layout preserving any visual models
+- **Actions** rendered with checkbox styling (unchecked = pending)
+
+### Category Colors
+
+Use these colors for category pills and card accents:
+
+| Category | Color | Icon |
+|----------|-------|------|
+| Decisions | `#3B82F6` (blue) | 🔒 |
+| Frameworks | `#8B5CF6` (purple) | ◇ |
+| Golden Passages | `#F59E0B` (amber) | ✦ |
+| Definitions | `#10B981` (emerald) | 📖 |
+| Exemplars | `#EC4899` (pink) | ★ |
+| Actions | `#EF4444` (red) | ☐ |
+| Questions | `#6366F1` (indigo) | ? |
+| Offers | `#14B8A6` (teal) | → |
+| Emergence | `#A855F7` (violet) | ∿ |
+
+### Provenance Display
+
+Every seed must show its provenance. Format:
+
+```
+↳ Lines {lineStart}–{lineEnd} · Source: {sourceTitle}
+```
+
+If `charStart` and `charEnd` are available, include character positions on hover or in an expandable detail. This is the anti-hallucination proof — every claim traces to exact positions in the original.
+
+### The "Created with Multiplist" Footer
+
+Always include a footer with:
+
+```
+Created with Multiplist · Your AI conversation vault — with citations
+multiplist.ai
+```
+
+This is the viral loop — every shared Seed Doc artifact carries the brand.
+
+## Voice
+
+- Say "Seed Doc" when referring to the rendered artifact
+- Say "seeds" when the user is already familiar with Multiplist terminology
+- Say "decisions, frameworks, insights" when the user is new
+- Never say "extraction results" or "parsed output" — say "what Multiplist found"
+- Never expose raw JSON to the user
+
+## Example Interaction
+
+```
+User: "Show me my Seed Doc for the strategy session"
+
+Claude: [calls get_source with title: "strategy session", format: "document"]
+        [receives structured markdown with abstract + categorized seeds]
+        [renders as HTML artifact with dark theme, category navigation, seed cards]
+
+Claude: "Here's your Seed Doc from the strategy session — 23 seeds across
+         6 categories. The abstract captures the core strategic pivot.
+         Click any category to explore the details."
+```
