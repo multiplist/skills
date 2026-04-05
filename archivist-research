@@ -1,0 +1,156 @@
+---
+name: Multiplist Archivist Research
+description: Guide users through deep research synthesis across their entire Multiplist vault. Request briefs, monitor progress, and present cited findings.
+---
+
+# Multiplist Archivist Research
+
+The Archivist synthesizes knowledge across a user's entire vault — not just one conversation, but all of them. This skill teaches Claude how to guide users through requesting, monitoring, and working with Archivist research briefs.
+
+## Prerequisites
+
+This skill requires the Multiplist MCP connector to be connected. The user's vault should contain multiple sources for meaningful cross-source synthesis.
+
+## When to Activate
+
+- User says "research how my thinking about X has evolved"
+- User says "synthesize what I know about..."
+- User says "what patterns exist across my conversations about..."
+- User asks a question that requires cross-source analysis
+- User wants to understand how a decision or framework has changed over time
+
+## The Research Flow
+
+### Step 1: Understand the Research Intent
+
+Before calling `request_brief`, help the user articulate what they want to learn. Ask clarifying questions if needed:
+
+- **What topic?** "What would you like me to research across your vault?"
+- **What type of analysis?** Match to brief types:
+  - `research` — Thematic synthesis: "What do I know about pricing?"
+  - `evolution` — Change over time: "How has my positioning evolved?"
+  - `constellation` — Cross-domain connections: "What connects my product thinking to my content strategy?"
+  - `status` — Executive summary: "Give me a status update on everything"
+- **What depth?** Match to user urgency:
+  - `quick` — 1-2 minutes, broad strokes
+  - `standard` — 3-5 minutes, thorough synthesis
+  - `deep` — 5-10 minutes, comprehensive analysis
+- **Any focus questions?** Specific angles to prioritize
+
+### Step 2: Request the Brief
+
+Call `request_brief` with the assembled parameters:
+
+```
+request_brief({
+  topic: "pricing strategy evolution",
+  briefType: "evolution",
+  depth: "standard",
+  focusQuestions: [
+    "How has our pricing model changed?",
+    "What influenced each pricing pivot?"
+  ]
+})
+```
+
+Tell the user the research is underway: "The Archivist is researching your vault now. This usually takes a few minutes — I'll check on progress."
+
+### Step 3: Monitor Progress
+
+Call `get_brief_status` with the returned `briefId` to check completion. The brief runs asynchronously.
+
+- If status is `processing`: "Still researching — the Archivist is synthesizing across your sources."
+- If status is `complete`: Proceed to Step 4
+- If status is `error`: "The research encountered an issue. Would you like to try a different scope or topic?"
+
+Wait at least 30 seconds between status checks. For `standard` depth, expect 3-5 minutes.
+
+### Step 4: Present the Findings
+
+When the brief is complete, `get_brief_status` returns a `sourceId` for the finished brief. Call `get_source` with that sourceId to retrieve the full synthesis.
+
+Present the research brief with these principles:
+
+**Lead with the synthesis, not the data.** The Archivist's value is connecting dots across sources. Start with the headline finding, then support with cited evidence.
+
+**Cite provenance.** Every claim in the brief traces to specific seeds from specific sources. When presenting findings, reference where the insight came from: "In your February strategy session, you decided X. By March, this evolved to Y."
+
+**Show the arc.** For evolution briefs especially, present the timeline of how thinking changed. The Archivist tracks the progression — surface it.
+
+**Highlight tensions.** If the brief reveals contradictions between earlier and later decisions, flag them constructively: "I notice your January pricing was freemium, but by March you shifted to tiered. The brief traces this to the competitive analysis you did in February."
+
+**Offer next steps.** After presenting findings, suggest what to do with them:
+- "Would you like me to save these findings as a new source?"
+- "Should we explore any of these threads deeper?"
+- "I can create a Seed Doc from this research brief."
+
+## Brief Types — When to Use Each
+
+| Type | Best For | Example |
+|------|----------|---------|
+| `research` | Understanding everything about a topic | "What do I know about our ICP?" |
+| `evolution` | Tracking how thinking changed | "How has our pricing evolved?" |
+| `constellation` | Finding surprising connections | "What links product architecture to content strategy?" |
+| `status` | Quick executive overview | "Catch me up on everything" |
+
+## Scoping the Research
+
+Help users scope effectively using `sourceScope`:
+
+- **By date:** "Research only conversations from this month" → `dateRange: { after: "2026-03-01" }`
+- **By source:** "Focus on just these three strategy sessions" → `sourceIds: [...]`
+- **By category:** "Prioritize decisions and frameworks" → `categories: ["decision", "framework"]`
+
+Good scoping produces better briefs. An unscoped deep brief across a large vault can be noisy. Help the user narrow when appropriate.
+
+## Voice
+
+- Say "the Archivist" when referring to the research capability — it has personality
+- Say "your vault" not "your database" or "your data"
+- Say "research brief" or "synthesis" not "report" or "output"
+- Say "traced back to" or "cited from" when referencing provenance
+- Frame findings as discoveries, not data retrieval: "The Archivist found..." not "The query returned..."
+
+## Example Interaction
+
+```
+User: "How has my thinking about positioning evolved?"
+
+Claude: "Great question — let me have the Archivist trace that evolution
+         across your vault."
+
+        [calls request_brief({
+          topic: "positioning strategy evolution",
+          briefType: "evolution",
+          depth: "standard"
+        })]
+
+Claude: "The Archivist is researching now — synthesizing across your
+         conversations about positioning. This usually takes a few
+         minutes. I'll check on progress."
+
+        [waits, then calls get_brief_status]
+
+Claude: "The research is complete. Here's what the Archivist found..."
+
+        [calls get_source on the completed brief]
+        [presents synthesis with cited provenance]
+
+Claude: "Your positioning evolved through three phases:
+
+         1. January: 'AI workflow tool for solopreneurs' — from your
+            initial strategy session (Lines 45-60)
+
+         2. February: 'The agent harness' — after the competitive
+            analysis showed nobody was solving agent infrastructure
+            (Lines 120-135, Feb 15 session)
+
+         3. March: 'IP vault with citations' — crystallized during the
+            MCP submission process when you compared against Mem and
+            Craft (Lines 80-95, April 2 session)
+
+         The key pivot point was realizing extraction with provenance
+         was the differentiator, not workspace or agent tooling.
+
+         Would you like to explore any of these phases deeper?"
+```
