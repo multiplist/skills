@@ -1,0 +1,214 @@
+---
+name: Multiplist Custom Extraction Skills
+description: Guide users through creating custom extraction categories that teach Multiplist to find domain-specific meaning in their conversations. A coach creates "Client Breakthroughs." A consultant creates "Engagement Red Flags."
+---
+
+# Multiplist Custom Extraction Skills
+
+Multiplist extracts nine default categories of meaning from conversations: Decisions, Frameworks, Golden Passages, Definitions, Exemplars, Actions, Questions, Offers, and Emergence. Custom extraction skills let users define their OWN categories — teaching the system to find meaning that matters in their specific domain.
+
+## Prerequisites
+
+This skill requires the Multiplist MCP connector to be connected. The user should understand what Multiplist does (saving and extracting conversations) before creating custom skills.
+
+## When to Activate
+
+- User says "I want to extract something specific from my conversations"
+- User says "can Multiplist find [domain-specific thing]?"
+- User says "create a custom skill" or "create an extraction skill"
+- User describes a category of meaning the default nine don't capture
+- User works in a specialized domain (coaching, consulting, product management, research) and mentions wanting structured extraction tailored to their work
+
+## The Conversational Design Flow
+
+Guide the user through five questions to build their custom skill. This is a conversation, not a form — make it feel natural.
+
+### Question 1: What's Your Domain?
+
+Understand what kind of conversations the user has.
+
+"What kind of conversations do you typically save to your vault? Strategy sessions, coaching calls, client meetings, research interviews?"
+
+This helps you frame the rest of the questions in their language.
+
+### Question 2: What Do You Wish You Could Find Later?
+
+This is the key question. The answer defines their custom categories.
+
+"When you look back at those conversations, what do you wish was already pulled out and organized? What kinds of things do you find yourself searching for?"
+
+Listen for patterns like:
+- "I wish I could find all the moments where clients had breakthroughs"
+- "I need to track every time a risk or red flag was mentioned"
+- "I want to capture all the technical requirements scattered across meetings"
+- "I need to pull out every pricing signal from sales calls"
+
+### Question 3: Define the Categories
+
+Translate their wishes into 3-7 named categories. Each category needs:
+- A **name** (clear, specific, domain-appropriate)
+- A **description** (what qualifies as this category — what to look for)
+
+Help the user refine. Examples by domain:
+
+**Coaching:**
+| Category | What to Extract |
+|----------|----------------|
+| Client Breakthroughs | Moments of insight, perspective shifts, or emotional clarity |
+| Resistance Patterns | Recurring objections, avoidance behaviors, or limiting beliefs |
+| Homework Commitments | Specific actions the client committed to before next session |
+| Session Themes | Dominant topics or emotional currents in each session |
+
+**Product Management:**
+| Category | What to Extract |
+|----------|----------------|
+| Sprint Decisions | Feature priorities, scope changes, and trade-offs agreed upon |
+| User Pain Points | Specific frustrations, workarounds, or unmet needs mentioned |
+| Technical Debt Flags | Architecture concerns, shortcuts acknowledged, or refactor needs |
+| Competitive Signals | References to competitor features, pricing, or positioning |
+
+**Consulting:**
+| Category | What to Extract |
+|----------|----------------|
+| Client Requirements | Stated needs, constraints, and success criteria |
+| Engagement Red Flags | Scope creep signals, misaligned expectations, communication issues |
+| Deliverable Milestones | Agreed outputs, timelines, and acceptance criteria |
+| Relationship Signals | Trust indicators, stakeholder dynamics, political context |
+
+**Sales:**
+| Category | What to Extract |
+|----------|----------------|
+| Pricing Signals | Budget mentions, price sensitivity, willingness to pay indicators |
+| Decision Criteria | What the buyer says matters most in their evaluation |
+| Objections | Stated concerns, hesitations, or blockers to purchase |
+| Champion Quotes | Statements from internal advocates that could advance the deal |
+
+### Question 4: Confirm the Skill Definition
+
+Present the skill back to the user before creating it:
+
+"Here's the extraction skill I'll create for you:
+
+**Name:** [Skill Name]
+**Categories:**
+1. [Category 1] — [Description]
+2. [Category 2] — [Description]
+3. [Category 3] — [Description]
+
+When you extract a conversation using this skill, Multiplist will find instances of each category with full provenance — you'll see exactly where in the conversation each item appeared.
+
+Does this look right, or would you like to adjust anything?"
+
+### Question 5: Create and Test
+
+Once confirmed, call `create_skill` with the assembled definition.
+
+Then immediately offer to test it:
+
+"Your skill is created. Want to test it? You can either:
+1. Save a new conversation and extract with this skill
+2. Re-extract an existing source using your new categories
+
+Which would you like to try?"
+
+If testing with an existing source, call `trigger_extraction` with the new `skillId`.
+
+After extraction completes, call `get_source` to show the results. Present using the Seed Doc Renderer patterns — the custom categories should appear as sections alongside or instead of the default nine.
+
+## Creating the Skill via MCP
+
+The `create_skill` tool expects:
+
+```
+create_skill({
+  name: "Coaching Session Extractor",
+  description: "Extract structured insights from coaching conversations",
+  categories: [
+    {
+      name: "Client Breakthroughs",
+      description: "Moments of insight, perspective shifts, or emotional clarity expressed by the client"
+    },
+    {
+      name: "Resistance Patterns", 
+      description: "Recurring objections, avoidance behaviors, or limiting beliefs that surface"
+    },
+    {
+      name: "Homework Commitments",
+      description: "Specific actions the client committed to completing before next session"
+    }
+  ]
+})
+```
+
+The skill is stored in the user's vault and can be reused on any future extraction.
+
+## Using Custom Skills for Extraction
+
+When the user wants to extract with a custom skill:
+
+1. Call `list_skills` to show available skills
+2. Call `match_skills` with a source to auto-detect which skills apply
+3. Call `trigger_extraction` with the chosen `skillId`
+4. Call `get_source` to see the results
+
+`match_skills` is particularly powerful — it analyzes a source and recommends which custom skills would produce the best results. This is how the system gets smarter over time: more skills, better matching, more relevant extraction.
+
+## Voice
+
+- Say "extraction skill" or "custom skill" — not "extractor" or "parser"
+- Say "categories of meaning" — not "fields" or "schema"
+- Say "teach the system" — not "configure" or "program"
+- Frame it as a creative act: "You're defining what matters in your world"
+- Celebrate the result: "Your vault now speaks your language"
+- Never expose internal terms like "Neuron" or "skillId" — say "the extraction engine"
+
+## Example Interaction
+
+```
+User: "I do a lot of coaching calls. Can Multiplist pull out specific
+       things from those conversations?"
+
+Claude: "Absolutely — you can create a custom extraction skill that
+         teaches Multiplist to find exactly what matters in coaching
+         conversations. Let me help you define it.
+
+         When you look back at coaching sessions, what do you wish
+         was already pulled out and organized?"
+
+User: "I want to find breakthrough moments, when clients resist
+       change, and what homework they committed to."
+
+Claude: "Those are great categories. Here's what I'd create:
+
+         Name: Coaching Session Extractor
+         Categories:
+         1. Client Breakthroughs — Moments of insight, perspective
+            shifts, or emotional clarity
+         2. Resistance Patterns — Recurring objections, avoidance,
+            or limiting beliefs
+         3. Homework Commitments — Specific actions committed to
+            before next session
+
+         Each one gets extracted with full provenance — you'll see
+         exactly where in the conversation it appeared.
+
+         Does this look right?"
+
+User: "Yes, perfect!"
+
+Claude: [calls create_skill with the definition]
+
+Claude: "Done — your Coaching Session Extractor is live. Want to
+         test it on an existing conversation, or save a new one
+         and extract with it?"
+
+User: "Let's test it on my last coaching call."
+
+Claude: [calls trigger_extraction with the new skillId]
+        [calls get_source to show results]
+
+Claude: "Here's what the skill found in your last session — 3
+         breakthroughs, 2 resistance patterns, and 4 homework
+         commitments. Each one traced to the exact moment in
+         the conversation. Your vault now speaks your language."
+```
