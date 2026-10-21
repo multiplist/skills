@@ -1,0 +1,22 @@
+{
+  "name": "multiplist",
+  "version": "1.1.0",
+  "description": "Give Claude cited memory of your own thinking. Multiplist saves your conversations and documents to a private vault, extracts decisions, frameworks and key passages with exact character-level provenance, and recalls them later with citations that trace back to what you actually said.",
+  "author": {
+    "name": "Multiplist",
+    "url": "https://multiplist.ai"
+  },
+  "homepage": "https://multiplist.ai",
+  "repository": "https://github.com/multiplist/skills",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "knowledge",
+    "vault",
+    "search",
+    "research",
+    "provenance",
+    "notes",
+    "productivity"
+  ]
+}
